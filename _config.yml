@@ -79,5 +79,5 @@ exclude_generator:
 deploy:
   type: github
   repository: dearroy.github.io
-  branch: master
+  branch: origin
   
