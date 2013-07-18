@@ -78,6 +78,6 @@ exclude_generator:
 ## Docs: http://zespia.tw/hexo/docs/deploy.html
 deploy:
   type: github
-  repository: dearroy.github.io
-  branch: origin
+  repository: https://github.com/dearroy/dearroy.github.io.git
+  branch: master
   
