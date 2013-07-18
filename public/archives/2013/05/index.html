@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Archives: 2013/5 | 亲爱的罗伊</title>
+	<meta name="author" content="DearRoy">
+	<meta name="generator" content="Hexo 1.0.4">
+	<meta name="viewport" content="width=device-width">
+	
+	<link rel="icon" href="/favicon.png">
+	<link rel="alternate" href="/atom.xml" title="亲爱的罗伊" type="application/atom+xml">
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script>
+	var _gaq = _gaq || [];
+	var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+	_gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+	_gaq.push(['_setAccount', 'UA-16832147-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+	</script>
+</head>
+<body>
+<header id="header">
+	<div class="wrapper"><p id="logo"><a href="/">亲爱的罗伊</a></p>
+	<nav id="nav">
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/categories/Life/">Life</a></li>
+			<li><a href="/categories/linux/">Linux</a></li>
+			<li><a href="/categories/web">Web</a></li>
+			<li><a href="/">Snapshot</a></li>
+			<li><a href="/about">About</a></li>
+			<li><a href="http://paulhost.com">Host</a></li>
+		</ul>
+	</nav>
+</div>
+</header>
+<div id="head"></div>
+<div id="posts">
+	
+<h1 class="archive-title">2013/5</h2>
+
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/linux/2013/05/09/cloneback-uprestore-openvz-vms-with-vzdump.html">使用vzdump备份和恢复OpenVZ VPS</a></h2></center>
+			<div class="post-time"><time datetime="2013-05-08T16:00:00.000Z">5月 9 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+
+<p>这本质上来说不算一篇技术文，它仅仅是经验上的总结和部分官方文档的汉化，本只是留给自己备忘，若能给后来者带来一点点帮助，那也便是极好的、</p>
+<h2>准备工作</h2>
+<p>现在，我们假设有两台OpenVZ母鸡，均为OpenVZ虚拟化环境，现在需要从A母鸡向B母鸡备份转移VPS。</p>
+<p>A服务器IP：192.168.0.100</p>
+<p>B服务器IP：192.168.0.101</p>
+<p>先假设两台服务器均为CentOS 6操作系统，实际上其他的操作系统版本也没有问题。</p>
+<p>首先我们需要在两台服务器上都安装 <code>vzdump</code> 和 <code>rsync</code> 。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">yum</span> install vzdump rsync
+</pre></td></tr></table></figure>
+
+
+
+		</div>
+	</article>
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/life/2013/05/06/hello-world.html">Hello World</a></h2></center>
+			<div class="post-time"><time datetime="2013-05-05T16:00:00.000Z">5月 6 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+<p><img src="http://pic.dearroy.com/github/ZC5fa.png"></p>
+<p>这绝对是一个崭新的开始。</p>
+<p>抛弃WordPress而开始使用 <a href="http://jekyllrb.com/">Jekyll</a> 来作为博客写作的平台，酝酿已有数月之久。奈何闲时不多，一直搁浅。
+在过去的很长一段时间里，我一直很挣扎，挣扎于博客存在的意义和它存在的形式。一转眼又是一年过去了，
+现在人更多的是为了赚钱为了吸引流量而写博客，不可否认的是这确乎是博客的一部分实质，但对于我个人来说，
+访问量、PR、搜索引擎排名都已经没有任何意义，于是索性抛弃过去，迎接崭新的开始。</p>
+<p>当然促成这样的新开篇，原因并没有这么简单。但是无论如何，我欣喜于现在的一切，我将重新回到我的博客生活，
+思考我的收获和遗憾，人生总要有那么一些追求，譬如自我完善。</p>
+<p>这次的开始，我打算开始尝试向技术型博客转型，主要涉及 <code>Linux运维</code> 和 <code>web前端</code> 。必须承认的一点，在技术这条道路上我还是一个不断摸索前进的新手，
+技术高速更新换代的年代，我希望我永远是一个学习者。</p>
+<p>关于 Jekyll ，是在很久之前逛 <a href="http://v2ex.com">v2ex</a> 的时候发现的，尝试了一下之后觉得爱不释手，晚些时候我会根据我的自身经验写一些教程，
+只是为了方便后来者参考，同时也希望高手大牛不吝指点。</p>
+<p>第一篇就写到这里了，好久不见的朋友们，你们还好吗？</p>
+
+
+		</div>
+	</article>
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/web/2013/05/06/apaxy-a-simple-and-customable-apache-directory-theme.html">Apaxy - 轻便精致的Apache目录主题</a></h2></center>
+			<div class="post-time"><time datetime="2013-05-05T16:00:00.000Z">5月 6 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+<p><img src="http://adamwhitcroft.com/apaxy/img/example.png">
+Apaxy是我一直在使用的Apache目录主题，它改变了Apache默认的目录列表样式，它的可扩展性和可定制型
+极大地改善了用户的浏览体验。Apaxy主要使用了mod_autoindex这个模块以及一些CSS文件来对默认样式进行
+重写。</p>
+<p>在开始介绍之前，你可以先看看罗伊的 <a href="http://dearroy.info">演示</a> 以及它的 <a href="https://github.com/AdamWhitcroft/Apaxy">GitHub repo</a>。</p>
+<h2>特色</h2>
+<p>Apaxy可能看起来十分简单，但你的创造性和动手能力足以让它变得更加符合你的心意：</p>
+<ul>
+<li>使用CSS定制默认目录样式</li>
+<li>使它和 <code>Javascript</code> 或者 <code>JQuery</code> 结合</li>
+<li>添加欢迎信息、下载提示或者版权提示</li>
+<li>自定义mime类型图标 （需要.htaccess协同工作）</li>
+</ul>
+<h2>部署</h2>
+<p>首先，Apaxy需要在 <code>Apache(2.0.23+)</code> 环境下才能正常工作。</p>
+<p>现在，假设你有一个目录名字叫share想要作为你的网页目录（即<a href="http://yourdomain.tld/share">http://yourdomain.tld/share</a>):</p>
+<ul>
+<li>从Github下载Apaxy并解压</li>
+<li>上传 <code>/apaxy</code> 文件夹中的内容到你的服务器或主机的 <code>/share</code> 目录</li>
+<li>编辑 <code>htaccess.txt</code> （现在在 <code>/share</code> 目录下），对相应的路径进行更新以匹配你当前的主机或服务器</li>
+<li>完成编辑后，将 <code>/share</code> 目录和 <code>/share/theme</code> 下的 <code>htaccess.txt</code> 重命名为 <code>.htaccess</code> </li>
+</ul>
+<p>大功告成，访问你的指定地址看看，是不是变样了？</p>
+
+
+		</div>
+	</article>
+	
+	<nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+
+</div>
+<footer id="footer">
+	<div class="footer"><p>&copy; 2013 亲爱的罗伊 All Rights Reserved | Proudly powered by <a href="https://paulvps.com/">PaulVPS</a> & <a href="http://github.com/">Github</a>.</p></div>
+</footer>
+<script>
+(function(d, s) {
+	var js, fjs = d.getElementsByTagName(s)[0],
+	add = function(url, id, o) {
+		if (d.getElementById(id)) return;
+		js = d.createElement(s);
+		js.src = url; js.async = true; js.id = id;
+		fjs.parentNode.insertBefore(js, fjs);
+		if (window.ActiveXObject && o != null) {
+			js.onreadystatechange = function() {
+				if (js.readyState == 'complete') o();
+				if (js.readyState == 'loaded') o();
+			};
+		} else { js.onload = o; }
+	};
+	// Google+1
+	window.___gcfg = { lang: "ja" };
+	add('https://apis.google.com/js/plusone.js');
+	// Facebook
+	add('//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=231858050163702', 'facebook-jssdk');
+	// Twitter
+	add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+}(document, 'script'));
+</script>
+</body>
+</html>

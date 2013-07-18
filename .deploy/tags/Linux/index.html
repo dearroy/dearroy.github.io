@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Linux | 亲爱的罗伊</title>
+	<meta name="author" content="DearRoy">
+	<meta name="generator" content="Hexo 1.0.4">
+	<meta name="viewport" content="width=device-width">
+	
+	<link rel="icon" href="/favicon.png">
+	<link rel="alternate" href="/atom.xml" title="亲爱的罗伊" type="application/atom+xml">
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script>
+	var _gaq = _gaq || [];
+	var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+	_gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+	_gaq.push(['_setAccount', 'UA-16832147-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+	</script>
+</head>
+<body>
+<header id="header">
+	<div class="wrapper"><p id="logo"><a href="/">亲爱的罗伊</a></p>
+	<nav id="nav">
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/categories/Life/">Life</a></li>
+			<li><a href="/categories/linux/">Linux</a></li>
+			<li><a href="/categories/web">Web</a></li>
+			<li><a href="/">Snapshot</a></li>
+			<li><a href="/about">About</a></li>
+			<li><a href="http://paulhost.com">Host</a></li>
+		</ul>
+	</nav>
+</div>
+</header>
+<div id="head"></div>
+<div id="posts">
+	
+<h1 class="archive-title">Linux</h2>
+
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/linux/2013/06/20/install-lnmp-on-debian-7.html">Debian 7 使用Dotdeb源安装LNMP服务器</a></h2></center>
+			<div class="post-time"><time datetime="2013-06-19T16:00:00.000Z">6月 20 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+
+<p>大概在很早之前，我还一直使用着军哥写的LNMP一键包，因为安装方便，配置简单。但经过一段时间后发现，这其实妨碍了我们系统和深入地
+学习和理解Linux。</p>
+<p>这里是为了方便一个朋友，昨天晚上给他配置了一台服务器，但没有告诉他过程，所以写一篇比较简单的教程给他备忘。</p>
+<p>首先导入Dotdeb源，因为系统使用的官方源所安装的软件版本较低，所以这里推荐使用Dotdeb源。</p>
+<p>在向源中导入Dotdeb源之前，我们需要先获取并导入GnuPG key：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>wget http://www.dotdeb.org/dotdeb.gpg
+cat dotdeb.gpg | apt-key add -
+</pre></td></tr></table></figure>
+
+
+<p>提示OK后则导入成功。然后我们开始导入Dotdeb源，使用vim打开 <code>/etc/apt/sources.list</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vim</span> /etc/apt/sources.list
+</pre></td></tr></table></figure>
+
+<p>向其中添加如下两行：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>deb http://packages.dotdeb.org wheezy all
+deb-src http://packages.dotdeb.org wheezy all
+</pre></td></tr></table></figure>
+
+
+<p>添加之后，更新一下源：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-get <span class="operator"><span class="keyword">update</span>
+</pre></td></tr></table></figure>
+
+
+
+		</div>
+	</article>
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/linux/2013/06/18/install-xen-on-centos6.html">在CentOS 6上部署Xen虚拟化环境</a></h2></center>
+			<div class="post-time"><time datetime="2013-06-17T16:00:00.000Z">6月 18 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+
+<p>众所周知，在centos 6中，官方源已经去除了xen的rpm包，只能使用第三方源或自行编译，因为编译安装对于我这种菜鸟来说实在太过于繁琐，
+所以我选择来自 <a href="http://xen.crc.id.au/">Steve</a> 的这个第三方源来部署。</p>
+<p>如果这篇日志算是一篇教程的话，这是一篇偏实际操作的教程，至于理论教程，大家可以自行搜索学习，融会贯通。</p>
+<h2>1. 准备工作</h2>
+<p>首先检查SELinux是否已经禁用。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vi</span> /etc/sysconfig/selinux
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre><span class="comment"># This file controls the state of SELinux on the system.</span>
+<span class="comment"># SELINUX= can take one of these three values:</span>
+<span class="comment">#       enforcing - SELinux security policy is enforced.</span>
+<span class="comment">#       permissive - SELinux prints warnings instead of enforcing.</span>
+<span class="comment">#       disabled - SELinux is fully disabled.</span>
+SELINUX=disabled
+<span class="comment"># SELINUXTYPE= type of policy in use. Possible values are:</span>
+<span class="comment">#       targeted - Only targeted network daemons are protected.</span>
+<span class="comment">#       strict - Full SELinux protection.</span>
+SELINUXTYPE=targeted
+</pre></td></tr></table></figure>
+
+
+<p>修改完毕保存之后，使用 <code>reboot</code> 命令重启服务器。</p>
+
+
+		</div>
+	</article>
+	
+			
+	<article class="post">
+		<header class="post-header">
+			<center><h2><a href="/linux/2013/05/09/cloneback-uprestore-openvz-vms-with-vzdump.html">使用vzdump备份和恢复OpenVZ VPS</a></h2></center>
+			<div class="post-time"><time datetime="2013-05-08T16:00:00.000Z">5月 9 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+
+<p>这本质上来说不算一篇技术文，它仅仅是经验上的总结和部分官方文档的汉化，本只是留给自己备忘，若能给后来者带来一点点帮助，那也便是极好的、</p>
+<h2>准备工作</h2>
+<p>现在，我们假设有两台OpenVZ母鸡，均为OpenVZ虚拟化环境，现在需要从A母鸡向B母鸡备份转移VPS。</p>
+<p>A服务器IP：192.168.0.100</p>
+<p>B服务器IP：192.168.0.101</p>
+<p>先假设两台服务器均为CentOS 6操作系统，实际上其他的操作系统版本也没有问题。</p>
+<p>首先我们需要在两台服务器上都安装 <code>vzdump</code> 和 <code>rsync</code> 。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">yum</span> install vzdump rsync
+</pre></td></tr></table></figure>
+
+
+
+		</div>
+	</article>
+	
+	<nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+
+</div>
+<footer id="footer">
+	<div class="footer"><p>&copy; 2013 亲爱的罗伊 All Rights Reserved | Proudly powered by <a href="https://paulvps.com/">PaulVPS</a> & <a href="http://github.com/">Github</a>.</p></div>
+</footer>
+<script>
+(function(d, s) {
+	var js, fjs = d.getElementsByTagName(s)[0],
+	add = function(url, id, o) {
+		if (d.getElementById(id)) return;
+		js = d.createElement(s);
+		js.src = url; js.async = true; js.id = id;
+		fjs.parentNode.insertBefore(js, fjs);
+		if (window.ActiveXObject && o != null) {
+			js.onreadystatechange = function() {
+				if (js.readyState == 'complete') o();
+				if (js.readyState == 'loaded') o();
+			};
+		} else { js.onload = o; }
+	};
+	// Google+1
+	window.___gcfg = { lang: "ja" };
+	add('https://apis.google.com/js/plusone.js');
+	// Facebook
+	add('//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=231858050163702', 'facebook-jssdk');
+	// Twitter
+	add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+}(document, 'script'));
+</script>
+</body>
+</html>

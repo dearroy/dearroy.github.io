@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>在CentOS 6上部署Xen虚拟化环境 | 亲爱的罗伊</title>
+	<meta name="author" content="DearRoy">
+	<meta name="generator" content="Hexo 1.0.4">
+	<meta name="viewport" content="width=device-width">
+	<meta name="description" content="众所周知，在centos 6中，官方源已经去除了xen的rpm包，只能使用第三方源或自行编译，因为编译安装对于我这种菜鸟来说实在太过于繁琐，
+所以我选择来自 Steve 的这个第三方源来部署。
+如果这篇日志算是一篇教程的话，这是一篇偏实际操作的教程，至于理论教程，大家可以自行搜索学习，融会贯通。
+1">
+	<meta property="og:title" content="在CentOS 6上部署Xen虚拟化环境">
+	<meta property="og:site_name" content="亲爱的罗伊">
+	<meta property="og:image" content="undefined">
+	<link rel="icon" href="/favicon.png">
+	<link rel="alternate" href="/atom.xml" title="亲爱的罗伊" type="application/atom+xml">
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script>
+	var _gaq = _gaq || [];
+	var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+	_gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+	_gaq.push(['_setAccount', 'UA-16832147-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+	</script>
+</head>
+<body>
+<header id="header">
+	<div class="wrapper"><p id="logo"><a href="/">亲爱的罗伊</a></p>
+	<nav id="nav">
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/categories/Life/">Life</a></li>
+			<li><a href="/categories/linux/">Linux</a></li>
+			<li><a href="/categories/web">Web</a></li>
+			<li><a href="/">Snapshot</a></li>
+			<li><a href="/about">About</a></li>
+			<li><a href="http://paulhost.com">Host</a></li>
+		</ul>
+	</nav>
+</div>
+</header>
+<div id="head"></div>
+<div id="posts">
+		
+	<article class="post">
+		<header class="post-header">
+			<center><h2>在CentOS 6上部署Xen虚拟化环境</h2></center>
+			<div class="post-time"><time datetime="2013-06-17T16:00:00.000Z">6月 18 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+<p>众所周知，在centos 6中，官方源已经去除了xen的rpm包，只能使用第三方源或自行编译，因为编译安装对于我这种菜鸟来说实在太过于繁琐，
+所以我选择来自 <a href="http://xen.crc.id.au/">Steve</a> 的这个第三方源来部署。</p>
+<p>如果这篇日志算是一篇教程的话，这是一篇偏实际操作的教程，至于理论教程，大家可以自行搜索学习，融会贯通。</p>
+<h2>1. 准备工作</h2>
+<p>首先检查SELinux是否已经禁用。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vi</span> /etc/sysconfig/selinux
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre><span class="comment"># This file controls the state of SELinux on the system.</span>
+<span class="comment"># SELINUX= can take one of these three values:</span>
+<span class="comment">#       enforcing - SELinux security policy is enforced.</span>
+<span class="comment">#       permissive - SELinux prints warnings instead of enforcing.</span>
+<span class="comment">#       disabled - SELinux is fully disabled.</span>
+SELINUX=disabled
+<span class="comment"># SELINUXTYPE= type of policy in use. Possible values are:</span>
+<span class="comment">#       targeted - Only targeted network daemons are protected.</span>
+<span class="comment">#       strict - Full SELinux protection.</span>
+SELINUXTYPE=targeted
+</pre></td></tr></table></figure>
+
+
+<p>修改完毕保存之后，使用 <code>reboot</code> 命令重启服务器。</p>
+<a name="more"></a>
+
+<h2>2. 创建一个网桥</h2>
+<p>给服务器创建一个网桥，如此一来，此服务器上的所有虚拟服务器就可以像物理系统进入。要创建网桥，我们需要安装 <code>bridge-utils</code>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">yum</span> install bridge-utils
+</pre></td></tr></table></figure>
+
+<p>安装完成之后，我们开始配置网桥，创建一个 <code>/etc/sysconfig/network-scripts/ifcfg-br0</code>，并从 <code>/etc/sysconfig/network-scripts/ifcfg-eth0</code>中将
+<code>IPADDR, PREFIX, GATEWAY, DNS1和DNS2</code>这些参数复制过来，并确保你使用的是 <code>TYPE=Bridge</code> 而不是TYPE=Ethernet:</p>
+<p>首先创建ifcfg-br0:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vi</span> /etc/sysconfig/network-scripts/ifcfg-br0
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="code"><pre>DEVICE=<span class="string">"br0"</span>
+NM_CONTROLLED=<span class="string">"yes"</span>
+ONBOOT=yes
+TYPE=Bridge
+BOOTPROTO=none
+IPADDR=192.168.0.88
+PREFIX=16
+GATEWAY=192.168.0.1
+DNS1=8.8.8.8
+DNS2=8.8.4.4
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=yes
+IPV6INIT=no
+NAME=<span class="string">"System br0"</span>
+</pre></td></tr></table></figure>
+
+
+<p>然后修改ifcfg-eth0，并注释掉 <code>BOOTPROTO, IPADDR, PREFIX, GATEWAY, DNS1, and DNS2</code>，添加 <code>BRIDGE=br0</code>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vi</span> /etc/sysconfig/network-scripts/ifcfg-eth0
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre>DEVICE=<span class="string">"eth0"</span>
+NM_CONTROLLED=<span class="string">"yes"</span>
+ONBOOT=yes
+HWADDR=00:1E:90:F3:F1:07
+TYPE=Ethernet
+<span class="comment">#BOOTPROTO=none</span>
+<span class="comment">#IPADDR=192.168.0.88</span>
+<span class="comment">#PREFIX=16</span>
+<span class="comment">#GATEWAY=192.168.0.1</span>
+<span class="comment">#DNS1=8.8.8.8</span>
+<span class="comment">#DNS2=8.8.4.4</span>
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=yes
+IPV6INIT=no
+NAME=<span class="string">"System eth0"</span>
+UUID=5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03
+BRIDGE=br0
+</pre></td></tr></table></figure>
+
+
+<p>保存之后，重启网络。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>/etc/init.d/network re<span class="operator"><span class="keyword">start</span>
+</pre></td></tr></table></figure>
+
+<p>执行 <code>ifconfig</code>，查看当前网络情况：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td><td class="code"><pre>[root@dearroy ~]<span class="comment"># ifconfig</span>
+br0       Link encap:Ethernet  HWaddr 00:1E:90:F3:F1:07
+          inet addr:192.168.0.88  Bcast:192.168.0.255  Mask:255.255.255.0
+          inet6 addr: fe80::21e:90ff:fef3:f002/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:17 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:29 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:1196 (1.1 KiB)  TX bytes:2794 (2.7 KiB)
+
+eth0      Link encap:Ethernet  HWaddr 00:1E:90:F3:F1:07
+          inet6 addr: fe80::21e:90ff:fef3:f002/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:4554 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3020 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:6249612 (5.9 MiB)  TX bytes:254928 (248.9 KiB)
+          Interrupt:25 Base address:0x6000
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:3 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:3 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:1304 (1.2 KiB)  TX bytes:1304 (1.2 KiB)
+
+[root@dearroy ~]<span class="comment">#</span>
+</pre></td></tr></table></figure>
+
+
+<h2>3. 安装Xen</h2>
+<p>首先要检测你的CPU是否支持HVM虚拟化（硬件虚拟化），使用如下命令：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">egrep</span> <span class="comment">'(vmx|svm)'</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">color=always</span> <span class="comment">/proc/cpuinfo
+</pre></td></tr></table></figure>
+
+<p>输出结果中如果有如下显示，则说明你的CPU支持HVM虚拟化，如果什么都没有显示，则说明你的CPU支持paravirtualization虚拟化，即PV虚拟化，而不是HVM虚拟化。</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>flags		: fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx tm2 ssse3 cx16 xtpr pdcm dca lahf_lm dts tpr_shadow vnmi flexpriority
+flags		: fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx tm2 ssse3 cx16 xtpr pdcm dca lahf_lm dts tpr_shadow vnmi flexpriority
+</pre></td></tr></table></figure>
+
+
+<p>开头已经说过，因为CentOS 6 是基于 RedHat 6，官方源已经去除了xen的rpm包，所以这里我们使用一个第三方的源。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>yum install http://au1<span class="preprocessor">.mirror</span><span class="preprocessor">.crc</span><span class="preprocessor">.id</span><span class="preprocessor">.au</span>/repo/el6/x86_64/kernel-xen-release-<span class="number">6</span>-<span class="number">5.</span>noarch<span class="preprocessor">.rpm</span>
+</pre></td></tr></table></figure>
+
+<p>然后我们安装Xen, </p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">yum</span> install kernel-xen xen
+</pre></td></tr></table></figure>
+
+<p>这样之后，Xen以及Xen内核就已经安装到我们的服务器上了。在我们重启系统进入Xen内核之前，我们需要检查一下<code>GRUB bootloader</code>的启动引导配置，</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vi</span> /boot/grub/menu.lst
+</pre></td></tr></table></figure>
+
+<p>可以看到第一个内核应该就是刚刚安装的Xen内核：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>[...]
+title CentOS (2.6.32.54-1.el6xen.x86_64)
+        root (hd0,0)
+        kernel /vmlinuz-2.6.32.54-1.el6xen.x86_64 ro root=/dev/mapper/VolGroup00-LogVol00 rd_NO_LUKS LANG=en_US.UTF-8 rd_NO_MD quiet SYSFONT=latarcyrheb-sun16 rhgb crashkernel=auto  KEYBOARDTYPE=pc KEYTABLE=de rd_LVM_LV=VolGroup00/LogVol01 rd_LVM_LV=VolGroup00/LogVol00 rd_NO_DM
+        initrd /initramfs-2.6.32.54-1.el6xen.x86_64.img
+[...]
+</pre></td></tr></table></figure>
+
+
+<p>我们需要注意的是，Xen管理必须最先被加载。在 <code>kernel /vmlinuz...</code> 这一行，将第一个单词由<code>kernel</code>替换为<code>module</code>，下一行也一样操作
+——将 <code>initrd /initramfs...</code> 修改为 <code>module /initramfs...</code>。</p>
+<p>然后在以上提到的两行之前添加一行： </p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">kernel</span> /xen.gz dom0_mem=<span class="number">1024M</span> cpufreq=xen dom0_max_vcpus=<span class="number">1</span> dom0_vcpus_pin
+</pre></td></tr></table></figure>
+
+<p>添加之后，你的这一部分应该是如下这样：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="code"><pre>[...]
+title CentOS (2.6.32.54-1.el6xen.x86_64)
+        root (hd0,0)
+        kernel /xen.gz dom0_mem=1024M cpufreq=xen dom0_max_vcpus=1 dom0_vcpus_pin
+        module /vmlinuz-2.6.32.54-1.el6xen.x86_64 ro root=/dev/mapper/VolGroup00-LogVol00 rd_NO_LUKS LANG=en_US.UTF-8 rd_NO_MD quiet SYSFONT=latarcyrheb-sun16 rhgb crashkernel=auto  KEYBOARDTYPE=pc KEYTABLE=de rd_LVM_LV=VolGroup00/LogVol01 rd_LVM_LV=VolGroup00/LogVol00 rd_NO_DM
+        module /initramfs-2.6.32.54-1.el6xen.x86_64.img
+[...]
+</pre></td></tr></table></figure>
+
+
+<p>最后，检查一下 default 的值，如果不是0，修改为0，以确保第一个内核（也就是Xen内核）可以默认载入。</p>
+<p>一份完整的 <code>/boot/grub/menu.lst</code> 如下：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="code"><pre><span class="comment"># grub.conf generated by anaconda</span>
+<span class="comment">#</span>
+<span class="comment"># Note that you do not have to rerun grub after making changes to this file</span>
+<span class="comment"># NOTICE:  You have a /boot partition.  This means that</span>
+<span class="comment">#          all kernel and initrd paths are relative to /boot/, eg.</span>
+<span class="comment">#          root (hd0,0)</span>
+<span class="comment">#          kernel /vmlinuz-version ro root=/dev/mapper/VolGroup00-LogVol00</span>
+<span class="comment">#          initrd /initrd-[generic-]version.img</span>
+<span class="comment">#boot=/dev/sde</span>
+default=0
+timeout=5
+splashimage=(hd0,0)/grub/splash.xpm.gz
+hiddenmenu
+title CentOS (2.6.32.54-1.el6xen.x86_64)
+        root (hd0,0)
+        kernel /xen.gz dom0_mem=1024M cpufreq=xen dom0_max_vcpus=1 dom0_vcpus_pin
+        module /vmlinuz-2.6.32.54-1.el6xen.x86_64 ro root=/dev/mapper/VolGroup00-LogVol00 rd_NO_LUKS LANG=en_US.UTF-8 rd_NO_MD quiet SYSFONT=latarcyrheb-sun16 rhgb crashkernel=auto  KEYBOARDTYPE=pc KEYTABLE=de rd_LVM_LV=VolGroup00/LogVol01 rd_LVM_LV=VolGroup00/LogVol00 rd_NO_DM
+        module /initramfs-2.6.32.54-1.el6xen.x86_64.img
+title CentOS (2.6.32-220.el6.x86_64)
+        root (hd0,0)
+        kernel /vmlinuz-2.6.32-220.el6.x86_64 ro root=/dev/mapper/VolGroup00-LogVol00 rd_NO_LUKS LANG=en_US.UTF-8 rd_NO_MD quiet SYSFONT=latarcyrheb-sun16 rhgb crashkernel=auto  KEYBOARDTYPE=pc KEYTABLE=de rd_LVM_LV=VolGroup00/LogVol01 rd_LVM_LV=VolGroup00/LogVol00 rd_NO_DM
+        initrd /initramfs-2.6.32-220.el6.x86_64.img
+</pre></td></tr></table></figure>
+
+
+<p>最后，重启系统，准备进入xen内核。</p>
+<h2>4. 进入Xen内核</h2>
+<p>系统重启之后，不出意外服务器就已经是Xen内核了。</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>[root@gentlexen1 ~]<span class="comment"># uname -a</span>
+Linux gentlexen.paulvps.com 3.8.6-1.el6xen.x86_64 <span class="comment">#1 SMP Sat Apr 6 12:09:44 EST 2013 x86_64 x86_64 x86_64 GNU/Linux</span>
+</pre></td></tr></table></figure>
+
+
+<p>查看xm info:</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td><td class="code"><pre>[root@gentlexen1 ~]<span class="comment"># xm info</span>
+host                   : gentlexen1.paulvps.com
+release                : 3.8.6-1.el6xen.x86_64
+version                : <span class="comment">#1 SMP Sat Apr 6 12:09:44 EST 2013</span>
+machine                : x86_64
+nr_cpus                : 8
+nr_nodes               : 1
+cores_per_socket       : 4
+threads_per_core       : 2
+cpu_mhz                : 3392
+hw_caps                : bfebfbff:28100800:00000000:00007f40:77bae3ff:00000000:00000001:00000281
+virt_caps              : hvm hvm_directio
+total_memory           : 32662
+free_memory            : 9697
+free_cpus              : 0
+xen_major              : 4
+xen_minor              : 2
+xen_extra              : .1
+xen_caps               : xen-3.0-x86_64 xen-3.0-x86_32p hvm-3.0-x86_32 hvm-3.0-x86_32p hvm-3.0-x86_64 
+xen_scheduler          : credit
+xen_pagesize           : 4096
+platform_params        : virt_start=0xffff800000000000
+xen_changeset          : unavailable
+xen_commandline        : dom0_mem=1024M cpufreq=xen dom0_max_vcpus=1 dom0_vcpus_pin
+cc_compiler            : gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+cc_compile_by          : mockbuild
+cc_compile_domain      : crc.id.au
+cc_compile_date        : Sat Apr  6 12:57:25 EST 2013
+xend_config_format     : 4
+</pre></td></tr></table></figure>
+
+
+<p>到此，在CentOS 6上安装Xen的工作就已经完成了。接下来我还会写一篇如何安装api管理工具、编译安装libvirt以及安装xen guest的日志。</p>
+<p>如果大家有什么疑问，可以在此页留言和我一起探讨。</p>
+
+
+		</div>
+	</article>
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"roy"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+<footer id="footer">
+	<div class="footer"><p>&copy; 2013 亲爱的罗伊 All Rights Reserved | Proudly powered by <a href="https://paulvps.com/">PaulVPS</a> & <a href="http://github.com/">Github</a>.</p></div>
+</footer>
+<script>
+(function(d, s) {
+	var js, fjs = d.getElementsByTagName(s)[0],
+	add = function(url, id, o) {
+		if (d.getElementById(id)) return;
+		js = d.createElement(s);
+		js.src = url; js.async = true; js.id = id;
+		fjs.parentNode.insertBefore(js, fjs);
+		if (window.ActiveXObject && o != null) {
+			js.onreadystatechange = function() {
+				if (js.readyState == 'complete') o();
+				if (js.readyState == 'loaded') o();
+			};
+		} else { js.onload = o; }
+	};
+	// Google+1
+	window.___gcfg = { lang: "ja" };
+	add('https://apis.google.com/js/plusone.js');
+	// Facebook
+	add('//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=231858050163702', 'facebook-jssdk');
+	// Twitter
+	add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+}(document, 'script'));
+</script>
+</body>
+</html>

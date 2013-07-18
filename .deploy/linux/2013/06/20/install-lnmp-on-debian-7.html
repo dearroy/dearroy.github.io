@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Debian 7 使用Dotdeb源安装LNMP服务器 | 亲爱的罗伊</title>
+	<meta name="author" content="DearRoy">
+	<meta name="generator" content="Hexo 1.0.4">
+	<meta name="viewport" content="width=device-width">
+	<meta name="description" content="大概在很早之前，我还一直使用着军哥写的LNMP一键包，因为安装方便，配置简单。但经过一段时间后发现，这其实妨碍了我们系统和深入地
+学习和理解Linux。
+这里是为了方便一个朋友，昨天晚上给他配置了一台服务器，但没有告诉他过程，所以写一篇比较简单的教程给他备忘。
+首先导入Dotdeb源，因为系统使用的">
+	<meta property="og:title" content="Debian 7 使用Dotdeb源安装LNMP服务器">
+	<meta property="og:site_name" content="亲爱的罗伊">
+	<meta property="og:image" content="undefined">
+	<link rel="icon" href="/favicon.png">
+	<link rel="alternate" href="/atom.xml" title="亲爱的罗伊" type="application/atom+xml">
+	<link rel="stylesheet" href="/css/style.css">
+
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script>
+	var _gaq = _gaq || [];
+	var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+	_gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+	_gaq.push(['_setAccount', 'UA-16832147-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+	</script>
+</head>
+<body>
+<header id="header">
+	<div class="wrapper"><p id="logo"><a href="/">亲爱的罗伊</a></p>
+	<nav id="nav">
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/categories/Life/">Life</a></li>
+			<li><a href="/categories/linux/">Linux</a></li>
+			<li><a href="/categories/web">Web</a></li>
+			<li><a href="/">Snapshot</a></li>
+			<li><a href="/about">About</a></li>
+			<li><a href="http://paulhost.com">Host</a></li>
+		</ul>
+	</nav>
+</div>
+</header>
+<div id="head"></div>
+<div id="posts">
+		
+	<article class="post">
+		<header class="post-header">
+			<center><h2>Debian 7 使用Dotdeb源安装LNMP服务器</h2></center>
+			<div class="post-time"><time datetime="2013-06-19T16:00:00.000Z">6月 20 2013</time></div>
+		</header>
+
+		<div class="post-entry">
+
+<p>大概在很早之前，我还一直使用着军哥写的LNMP一键包，因为安装方便，配置简单。但经过一段时间后发现，这其实妨碍了我们系统和深入地
+学习和理解Linux。</p>
+<p>这里是为了方便一个朋友，昨天晚上给他配置了一台服务器，但没有告诉他过程，所以写一篇比较简单的教程给他备忘。</p>
+<p>首先导入Dotdeb源，因为系统使用的官方源所安装的软件版本较低，所以这里推荐使用Dotdeb源。</p>
+<p>在向源中导入Dotdeb源之前，我们需要先获取并导入GnuPG key：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>wget http://www.dotdeb.org/dotdeb.gpg
+cat dotdeb.gpg | apt-key add -
+</pre></td></tr></table></figure>
+
+
+<p>提示OK后则导入成功。然后我们开始导入Dotdeb源，使用vim打开 <code>/etc/apt/sources.list</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vim</span> /etc/apt/sources.list
+</pre></td></tr></table></figure>
+
+<p>向其中添加如下两行：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>deb http://packages.dotdeb.org wheezy all
+deb-src http://packages.dotdeb.org wheezy all
+</pre></td></tr></table></figure>
+
+
+<p>添加之后，更新一下源：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-get <span class="operator"><span class="keyword">update</span>
+</pre></td></tr></table></figure>
+
+<a name="more"></a>
+
+<p>接下来就开始安装 MySQL + PHP + Nginx 了。</p>
+<h2>1，安装MySQL</h2>
+<p>执行命令：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-get install -y mysql-<span class="keyword">server</span> mysql-<span class="keyword">client</span>
+</pre></td></tr></table></figure>
+
+<p>即可安装MySQL，安装过程中会询问 root密码 ，键入你需要的密码之后回车即可。</p>
+<p>安装完成后，执行如下命令进行一步安全设置：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="attribute">mysql_secure_installation
+</pre></td></tr></table></figure>
+
+<p>按照提示进行，过程中会询问是否更改 root密码，是否移除匿名用户，是否禁止root远程登录等。</p>
+<h2>2，安装PHP</h2>
+<p>执行命令：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-<span class="keyword">get</span> install php5-fpm php5-gd php5-mysql php5-memcache php5-curl
+</pre></td></tr></table></figure>
+
+<p>上面的命令安装了php5-memcache的扩展，于是继续安装 Memcached 。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-<span class="keyword">get</span> install memcached
+</pre></td></tr></table></figure>
+
+<p>安装完毕之后，使用 php5-fpm -v 查看一下PHP的版本：</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>root@ztbox:~<span class="comment"># php5-fpm -v</span>
+PHP 5.4.16-1~dotdeb.1 (fpm-fcgi) (built: Jun  8 2013 22:20:42)
+Copyright (c) 1997-2013 The PHP Group
+Zend Engine v2.4.0, Copyright (c) 1998-2013 Zend Technologies
+</pre></td></tr></table></figure>
+
+
+<h2>3，安装Nginx</h2>
+<p>关于Nginx，拾人牙慧一下：</p>
+<p>Nginx (&quot;engine x&quot;) 是一个高性能的 HTTP 和反向代理服务器，也是一个 IMAP/POP3/SMTP 代理服务器。 
+Nginx 是由 Igor Sysoev 为俄罗斯访问量第二的 Rambler.ru 站点开发的，它已经在该站点运行超过三年了。
+Igor 将源代码以类BSD许可证的形式发布。</p>
+<p>Nginx 超越 Apache 的高性能和稳定性，使得国内使用 Nginx 作为 Web 服务器的网站也越来越多，
+其中包括新浪博客、新浪播客、网易新闻、腾讯网、搜狐博客等门户网站频道，六间房、56.com等视频分享网站，Discuz!官方论坛、水木社区等知名论坛，
+盛大在线、金山逍遥网等网络游戏网站，豆瓣、人人网、YUPOO相册、金山爱词霸、迅雷在线等新兴Web 2.0网站。</p>
+<p>这里我直接安装了Nginx的全部扩展功能（nginx-full)，以应对以后可能出现的功能性增强。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>apt-<span class="keyword">get</span> install -y nginx-full
+</pre></td></tr></table></figure>
+
+<p>然后启动Nginx:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>service nginx <span class="operator"><span class="keyword">start</span>
+</pre></td></tr></table></figure>
+
+<p><img src="http://pics.dearroy.com/image.php?dm=PBRE" alt="welcome to nginx" /></p>
+<p>访问结果如上图，接下来配置Nginx。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>vim <span class="regexp">/etc/nginx/sites-available/</span><span class="reserved">default</span>
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="code"><pre>……
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    <span class="comment">#    # NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini</span>
+    <span class="comment">#</span>
+    <span class="comment">#    # With php5-cgi alone:</span>
+    <span class="comment">#   fastcgi_pass 127.0.0.1:9000;</span>
+    <span class="comment">#    # With php5-fpm:</span>
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+……
+</pre></td></tr></table></figure>
+
+
+<p>修改保存之后重启Nginx：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>service nginx re<span class="operator"><span class="keyword">start</span>
+</pre></td></tr></table></figure>
+
+<p>接下来我们新建一个phpinfo，查看php的详细信息：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">vim</span> /usr/share/nginx/html/phpinfo.php
+</pre></td></tr></table></figure>
+
+<figure class="highlight lang-php"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="preprocessor">&lt;?php</span> phpinfo(); <span class="preprocessor">?&gt;</span>
+</pre></td></tr></table></figure>
+
+
+<p>保存之后访问 <a href="http://ip/phpinfo.php">http://ip/phpinfo.php</a> , 如果出现 phpinfo 页面，则大功告成。</p>
+<h2>如何新建站点</h2>
+<p>和军哥的一键包不同，此方法所安装的 LNMP 需要手动添加站点配置文件。</p>
+<p><code>cd /etc/nginx/conf.d</code> 进入配置文件目录，新建一个站点配置文件，比如 <code>vi dearroy.com.conf</code>，</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre></td><td class="code"><pre>server {
+    listen 80;
+	
+	<span class="comment">#ipv6</span>
+    <span class="comment">#listen [::]:80 default_server;</span>
+	
+    root /usr/share/nginx/html/dearroy.com;
+	
+	<span class="comment">#默认首页文件名</span>
+    index index.php index.html index.htm;
+    
+	<span class="comment">#绑定域名</span>
+    server_name localhost;
+	
+	<span class="comment">#伪静态规则</span>
+	include wordpress.conf;
+	
+    location / {
+        try_files <span class="variable">$uri</span> <span class="variable">$uri</span>/ /index.html;        
+    }
+	<span class="comment">#定义错误页面</span>
+    <span class="comment">#error_page 404 /404.html;  </span>
+	
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass 127.0.0.1:9000;
+         fastcgi_index index.php;
+         include fastcgi_params;
+     }
+     <span class="comment">#PHP</span>
+}
+</pre></td></tr></table></figure>
+
+
+<p>保存之后重启Nginx，添加及绑定网站即完成。</p>
+<p>最后，附两个最常用的程序Nginx伪静态：</p>
+<p>WordPress:</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre>location / {
+<span class="keyword">if</span> (-f <span class="variable">$request_filename</span>/index.html){
+                rewrite (.*) <span class="variable">$1</span>/index.html <span class="keyword">break</span>;
+        }
+<span class="keyword">if</span> (-f <span class="variable">$request_filename</span>/index.php){
+                rewrite (.*) <span class="variable">$1</span>/index.php;
+        }
+<span class="keyword">if</span> (!-f <span class="variable">$request_filename</span>){
+                rewrite (.*) /index.php;
+        }
+}
+</pre></td></tr></table></figure>
+
+
+
+<p>Discuz X:</p>
+<figure class="highlight lang-bash"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="code"><pre>rewrite ^([^\.]*)/topic-(.+)\.html$ <span class="variable">$1</span>/portal.php?mod=topic&amp;topic=<span class="variable">$2</span> last;
+rewrite ^([^\.]*)/article-([0-9]+)-([0-9]+)\.html$ <span class="variable">$1</span>/portal.php?mod=view&amp;aid=<span class="variable">$2</span>&amp;page=<span class="variable">$3</span> last;
+rewrite ^([^\.]*)/forum-(\w+)-([0-9]+)\.html$ <span class="variable">$1</span>/forum.php?mod=forumdisplay&amp;fid=<span class="variable">$2</span>&amp;page=<span class="variable">$3</span> last;
+rewrite ^([^\.]*)/thread-([0-9]+)-([0-9]+)-([0-9]+)\.html$ <span class="variable">$1</span>/forum.php?mod=viewthread&amp;tid=<span class="variable">$2</span>&amp;extra=page%3D<span class="variable">$4</span>&amp;page=<span class="variable">$3</span> last;
+rewrite ^([^\.]*)/group-([0-9]+)-([0-9]+)\.html$ <span class="variable">$1</span>/forum.php?mod=group&amp;fid=<span class="variable">$2</span>&amp;page=<span class="variable">$3</span> last;
+rewrite ^([^\.]*)/space-(username|uid)-(.+)\.html$ <span class="variable">$1</span>/home.php?mod=space&amp;<span class="variable">$2</span>=<span class="variable">$3</span> last;
+rewrite ^([^\.]*)/([a-z]+)-(.+)\.html$ <span class="variable">$1</span>/<span class="variable">$2</span>.php?rewrite=<span class="variable">$3</span> last;
+<span class="keyword">if</span> (!-e <span class="variable">$request_filename</span>) {
+        <span class="keyword">return</span> 404;
+</pre></td></tr></table></figure>
+
+
+		</div>
+	</article>
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"roy"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+<footer id="footer">
+	<div class="footer"><p>&copy; 2013 亲爱的罗伊 All Rights Reserved | Proudly powered by <a href="https://paulvps.com/">PaulVPS</a> & <a href="http://github.com/">Github</a>.</p></div>
+</footer>
+<script>
+(function(d, s) {
+	var js, fjs = d.getElementsByTagName(s)[0],
+	add = function(url, id, o) {
+		if (d.getElementById(id)) return;
+		js = d.createElement(s);
+		js.src = url; js.async = true; js.id = id;
+		fjs.parentNode.insertBefore(js, fjs);
+		if (window.ActiveXObject && o != null) {
+			js.onreadystatechange = function() {
+				if (js.readyState == 'complete') o();
+				if (js.readyState == 'loaded') o();
+			};
+		} else { js.onload = o; }
+	};
+	// Google+1
+	window.___gcfg = { lang: "ja" };
+	add('https://apis.google.com/js/plusone.js');
+	// Facebook
+	add('//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=231858050163702', 'facebook-jssdk');
+	// Twitter
+	add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+}(document, 'script'));
+</script>
+</body>
+</html>
